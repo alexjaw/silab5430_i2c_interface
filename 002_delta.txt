@@ -1,0 +1,65 @@
+# Si538x/4x Delta Only Register Script
+# 
+# This script can be written to a device to reconfigure it. YOU MUST HAVE 
+# PREVIOUSLY WRITTEN ONE OF THE FULL CONFIGURATION SCRIPTS. For example, if at
+# device reset your system writes P3-Registers-Script.txt to fully reconfigure
+# the device, it can then write any of P*-Delta-Only-Registers-Script.txt to 
+# switch to new configuration. These "delta only" scripts contain only the 
+# registers that changed between configurations, skipping don't cares. The 
+# script also includes any configure pre-amble and post-amble register control
+# sequence that the device requires.
+# 
+# Part: Si5340
+# Project File: C:\Users\alexander\Documents\ClockBuilderFiles\Si5340-RevD-5340EVB1-002.slabtimeproj
+# Design ID: 5340EVB1
+# Includes Pre/Post Download Control Register Writes: Yes
+# Die Revision: B1
+# Creator: ClockBuilder Pro v2.28.1 [2018-09-24]
+# Created On: 2018-10-11 15:01:14 GMT+02:00
+Address,Data
+# 
+# Start configuration preamble
+0x0B24,0xC0
+0x0B25,0x00
+# Rev D stuck divider fix
+0x0502,0x01
+0x0505,0x03
+0x0957,0x17
+0x0B4E,0x1A
+# End configuration preamble
+# 
+# Delay 300 msec
+#    Delay is worst case time for device to complete any calibration
+#    that is running due to device state change previous to this script
+#    being processed.
+# 
+# Start configuration registers
+0x0115,0x28
+0x011A,0x29
+0x0238,0x00
+0x0239,0x11
+0x023A,0x01
+0x023D,0x00
+0x023E,0xFA
+0x0250,0x0D
+0x0253,0x01
+0x025C,0x06
+0x025F,0x01
+0x0306,0x13
+0x0310,0x00
+0x0311,0x20
+0x0312,0x08
+0x0316,0xE0
+0x031A,0x00
+0x031B,0x80
+0x031C,0x88
+0x0320,0x00
+0x0321,0xFA
+# End configuration registers
+# 
+# Start configuration postamble
+0x001C,0x01
+0x0B24,0xC3
+0x0B25,0x02
+# End configuration postamble
+
