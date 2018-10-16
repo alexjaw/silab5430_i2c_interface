@@ -10,4 +10,5 @@ add_executable(silab5430_i2c_interface
         48_delta.h
         makefile
         synth_config.h
-        synth_demo.c)
+        synth_demo.c
+        synth_demo_read.c)
