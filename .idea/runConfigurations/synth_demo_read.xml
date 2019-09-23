@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="synth_demo_read" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="silab5430_i2c_interface" TARGET_NAME="synth_demo_read" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="silab5430_i2c_interface" RUN_TARGET_NAME="synth_demo_read">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>
