@@ -7,8 +7,13 @@
 
 #include <stdint.h>
 #include "synth_config.h"
+#include "48_delta.h"
+#include "441_delta.h"
 
 #define SYNTH_ADDR        0x77//0x74
+
+typedef enum {OUT2=2,} synth_channel_t;
+typedef enum {F22M579, F24M576,} synth_freq_t;
 
 typedef struct
 {
@@ -19,7 +24,7 @@ typedef struct
 
 int synth_init();
 int synth_close();
-int synth_write_registers(synth_register_t const synth_registers[], int const n_regs);
+int synth_set_freq(synth_channel_t, synth_freq_t);
 uint8_t synth_read_register(synth_register_t si_register);
 
 #endif //SILAB5430_I2C_INTERFACE_SYNTH_H

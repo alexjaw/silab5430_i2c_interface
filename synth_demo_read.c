@@ -4,8 +4,6 @@
 * */
 #include <stdio.h>  //perror, printf
 #include <stdint.h>  //uintX_t
-
-#include "synth_config.h"
 #include "synth.h"
 
 int main(void) {

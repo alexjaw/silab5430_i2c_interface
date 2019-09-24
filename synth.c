@@ -19,12 +19,23 @@ static synth_regaddr_t get_reg_addr(synth_register_t si_register) {
     return regaddr;
 }
 
+/* Prototypes */
+static int synth_write_register(synth_register_t si_register);
+static int synth_write_registers(synth_register_t const synth_regs[], int const n_regs);
+/**/
+
 /* Init i2c and set up i2c slave */
 int synth_init() {
     if(i2cOpen()){
         perror("failed to open the bus\n");
         return 1;
     }
+
+    // Write full synth configuration
+    printf("Writing full configuration\n");
+    synth_write_registers(synth_registers, SYNTH_REG_CONFIG_NUM_REGS);
+    printf("Configuration finished.\n");
+
     return 0;
 }
 
@@ -62,12 +73,12 @@ static int synth_write_register(synth_register_t si_register) {
 }
 
 /* Write array of register data */
-int synth_write_registers(synth_register_t const synth_registers[], int const n_regs) {
+static int synth_write_registers(synth_register_t const synth_regs[], int const n_regs) {
     for (int i = 0; i < n_regs; ++i) {
         /*printf("0x%04x, 0x%02x\n",
                 synth_registers[i].address,
                 synth_registers[i].value);*/
-        if (synth_write_register(synth_registers[i]) != 0){
+        if (synth_write_register(synth_regs[i]) != 0){
             perror("Programming failed");
             synth_close();
             return 1;
@@ -113,4 +124,22 @@ uint8_t synth_read_register(synth_register_t si_register) {
         return 1;
     }
     return buffer[0];
+}
+
+int synth_set_freq(synth_channel_t channel, synth_freq_t freq){
+    int err = 0;
+    if(channel == OUT2){
+        if(freq == F22M579){
+            synth_write_registers(synth_registers_delta_441, DELTA_441_CONFIG_NUM_REGS);
+        }else if(freq == F24M576){
+            synth_write_registers(synth_registers_delta_48, DELTA_48_CONFIG_NUM_REGS);
+        }else{
+            perror("Unknown frequency\n");
+            err = 1;
+        }
+    }else{
+        perror("Only channel OUT2 is implemented\n");
+        err = 1;
+    }
+    return err;
 }
