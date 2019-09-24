@@ -12,6 +12,7 @@
 #include "synth_config.h"
 #include "441_delta.h"
 #include "48_delta.h"
+#include "i2c/i2c.h"
 
 #define PAGE              0x01
 #define END_PREAMBLE_REG  5
@@ -38,21 +39,15 @@ synth_regaddr_t get_reg_addr(synth_register_t si_register) {
 
 /* Init i2c and set up i2c slave */
 int synth_init() {
-    if ((file = open(device, O_RDWR)) < 0) {
+    if(i2cOpen()){
         perror("failed to open the bus\n");
-        return 1;
-    }
-
-    // Set i2c slave addr
-    if(ioctl(file, I2C_SLAVE, SYNTH_ADDR) < 0){
-        perror("Failed to set slave device addr\n");
         return 1;
     }
     return 0;
 }
 
 int synth_close() {
-    close(file);
+    i2cClose();
     return 0;
 }
 
@@ -68,7 +63,7 @@ int synth_write_register(synth_register_t si_register) {
     buffer[0] = PAGE;
     //buffer[1] = page;
     buffer[1] = regaddr.page;
-    if (write(file, buffer, 2) != 2) {
+    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 2)){
         perror("Failed to set page\n");
         return 1;
     }
@@ -77,7 +72,7 @@ int synth_write_register(synth_register_t si_register) {
     //buffer[0] = reg;
     buffer[0] = regaddr.reg;
     buffer[1] = val;
-    if (write(file, buffer, 2) != 2) {
+    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 2)){
         perror("Failed to set register\n");
         return 1;
     }
@@ -157,6 +152,7 @@ int main(void) {
     printf("Writing full configuration\n");
     synth_write_registers(synth_registers, SYNTH_REG_CONFIG_NUM_REGS);
     printf("Configuration finished.\n");
+    return 0;
 
     //change XMOS OUT2 44.1k*512 -> 48k*512
     printf("Will change OUT2 in 5s\n");

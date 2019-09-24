@@ -8,6 +8,7 @@
 #include <linux/i2c-dev.h>  //I2C_SLAVE
 #include <unistd.h> //read, write, close, sleep, usleep
 #include <stdint.h>  //uintX_t
+#include "i2c/i2c.h"
 
 #include "synth_config.h"
 #include "441_delta.h"
