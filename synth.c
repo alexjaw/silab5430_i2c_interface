@@ -7,6 +7,10 @@
 #include "synth.h"
 #include "i2c/i2c.h"
 
+#define PAGE              0x01
+#define END_PREAMBLE_REG  5
+#define PREAMBLE_SLEEP    300000  //us. Works down to 50000us
+
 /* Extract 8-bit page and register address from 16-bit register address */
 static synth_regaddr_t get_reg_addr(synth_register_t si_register) {
     uint8_t page = si_register.address >> 8; //MSB is page

@@ -8,9 +8,6 @@
 #include <stdint.h>
 #include "synth_config.h"
 
-#define PAGE              0x01
-#define END_PREAMBLE_REG  5
-#define PREAMBLE_SLEEP    300000  //us. Works down to 50000us
 #define SYNTH_ADDR        0x77//0x74
 
 typedef struct
@@ -22,7 +19,6 @@ typedef struct
 
 int synth_init();
 int synth_close();
-//int synth_write_register(synth_register_t si_register);
 int synth_write_registers(synth_register_t const synth_registers[], int const n_regs);
 uint8_t synth_read_register(synth_register_t si_register);
 
