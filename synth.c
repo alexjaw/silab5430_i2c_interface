@@ -30,7 +30,7 @@ int synth_close() {
 }
 
 /* Write data to one register */
-int synth_write_register(synth_register_t si_register) {
+static int synth_write_register(synth_register_t si_register) {
     //uint8_t page = get_page(si_register.address);
     //uint8_t reg = get_reg(si_register.address);
     synth_regaddr_t regaddr = get_reg_addr(si_register);
@@ -73,4 +73,40 @@ int synth_write_registers(synth_register_t const synth_registers[], int const n_
         }
     }
     return 0;
+}
+
+/* Read data from one register */
+uint8_t synth_read_register(synth_register_t si_register) {
+    //uint8_t page = get_page(si_register.address);
+    //uint8_t reg = get_reg(si_register.address);
+    synth_regaddr_t regaddr = get_reg_addr(si_register);
+    uint8_t buffer[2] = {0};
+
+    // On si3540, before we can access a register, we must set the page
+    buffer[0] = PAGE;
+    //buffer[1] = page;
+    buffer[1] = regaddr.page;
+    //if (write(file, buffer, 2) != 2) {
+    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 2)){
+        perror("Failed to set page\n");
+        return 1;
+    }
+
+    // A. Write register
+    //buffer[0] = reg;
+    buffer[0] = regaddr.reg;
+    //if (write(file, buffer, 1) != 1) {
+    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 1)){
+        perror("Failed to set register\n");
+        return 1;
+    }
+
+    // A. Read register
+    buffer[0] = 0;
+    //if (read(file, buffer, 1) != 1) {
+    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 1)){
+        perror("Failed to read register\n");
+        return 1;
+    }
+    return buffer[0];
 }

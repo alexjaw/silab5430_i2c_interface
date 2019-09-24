@@ -22,7 +22,8 @@ typedef struct
 
 int synth_init();
 int synth_close();
-int synth_write_register(synth_register_t si_register);
+//int synth_write_register(synth_register_t si_register);
 int synth_write_registers(synth_register_t const synth_registers[], int const n_regs);
+uint8_t synth_read_register(synth_register_t si_register);
 
 #endif //SILAB5430_I2C_INTERFACE_SYNTH_H
