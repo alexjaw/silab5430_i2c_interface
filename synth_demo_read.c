@@ -16,7 +16,7 @@
 #define PAGE              0x01
 #define END_PREAMBLE_REG  5
 #define PREAMBLE_SLEEP    300000
-#define SYNTH_ADDR        0x74
+#define SYNTH_ADDR        0x77
 
 int file;
 const char *device = "/dev/i2c-1";
@@ -140,17 +140,21 @@ int synt_read_registers() {
     return 1;
 }
 
+void update_address(uint8_t new_addr){
+    synth_register_t addr = {0x000b, new_addr};
+    synth_write_register(addr);
+}
+
 int main(void) {
     printf("Starting Si5340D reading demo\n");
-    uint16_t addr = 0x0000b;
+    uint16_t addr = 0x000b;
     printf("Reading i2c address from Si5340 register\n");
     synth_init();
 
-    // Write full synth configuration
-    /*
-    printf("Writing full configuration\n");
-    synth_write_registers(synth_registers, SYNTH_REG_CONFIG_NUM_REGS);
-     */
+    // Use this if you need to update the address register
+    // OBSERVE: could not program the si5340 with CPPro after
+    // using this function. Said that it has a DUT/Board mismatch.
+    //update_address(0x77);
 
     synth_register_t reg = {addr, 0};  // the second value is a dummy
     uint8_t value = synth_read_register(reg);

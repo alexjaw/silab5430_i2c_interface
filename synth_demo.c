@@ -15,8 +15,8 @@
 
 #define PAGE              0x01
 #define END_PREAMBLE_REG  5
-#define PREAMBLE_SLEEP    300000
-#define SYNTH_ADDR        0x74
+#define PREAMBLE_SLEEP    300000  //us. Works down to 50000us
+#define SYNTH_ADDR        0x77//0x74
 
 int file;
 const char *device = "/dev/i2c-1";
@@ -156,28 +156,16 @@ int main(void) {
     // Write full synth configuration
     printf("Writing full configuration\n");
     synth_write_registers(synth_registers, SYNTH_REG_CONFIG_NUM_REGS);
-
-    //verify, but skip preamble and postamble
-    /*for (int i = 0; i < SYNTH_REG_CONFIG_NUM_REGS; ++i) {
-        //printf("0x%04x, 0x%02x\n",
-        //        synth_registers[i].address,
-        //        synth_registers[i].value);
-        if ((i > 5) && (i < SYNTH_REG_CONFIG_NUM_REGS - 3)) {
-            if (synth_read_register(synth_registers[i]) != 0){
-                perror("Verification failed");
-                printf("failed at register %i\n", i);
-                close(file);
-                return 1;
-            }
-        }
-    }*/
+    printf("Configuration finished.\n");
 
     //change XMOS OUT2 44.1k*512 -> 48k*512
+    printf("Will change OUT2 in 5s\n");
     sleep(5);
     printf("Changing OUT2 44.1k*512 -> 48k*512\n");
     synth_write_registers(synth_registers_delta_48, DELTA_48_CONFIG_NUM_REGS);
 
     //change XMOS OUT2 48k*512 -> 44.1k*512
+    printf("Will change OUT2 in 5s\n");
     sleep(5);
     printf("Changing back 48k*512 -> 44.1k*512\n");
     synth_write_registers(synth_registers_delta_441, DELTA_441_CONFIG_NUM_REGS);
