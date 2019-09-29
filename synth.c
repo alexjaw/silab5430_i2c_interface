@@ -11,6 +11,12 @@
 #define END_PREAMBLE_REG  5
 #define PREAMBLE_SLEEP    300000  //us. Works down to 50000us
 
+/* Prototypes */
+static synth_regaddr_t get_reg_addr(synth_register_t si_register);
+static int write_register(synth_register_t si_register);
+static int write_registers(const synth_register_t *synth_regs, int const n_regs);
+/**/
+
 /* Extract 8-bit page and register address from 16-bit register address */
 static synth_regaddr_t get_reg_addr(synth_register_t si_register) {
     uint8_t page = si_register.address >> 8; //MSB is page
@@ -19,10 +25,10 @@ static synth_regaddr_t get_reg_addr(synth_register_t si_register) {
     return regaddr;
 }
 
-/* Prototypes */
-static int synth_write_register(synth_register_t si_register);
-static int synth_write_registers(synth_register_t const synth_regs[], int const n_regs);
-/**/
+int synth_close() {
+    i2cClose();
+    return 0;
+}
 
 /* Init i2c and set up i2c slave */
 int synth_init() {
@@ -33,60 +39,9 @@ int synth_init() {
 
     // Write full synth configuration
     printf("Writing full configuration\n");
-    synth_write_registers(synth_registers, SYNTH_REG_CONFIG_NUM_REGS);
+    write_registers(synth_registers, SYNTH_REG_CONFIG_NUM_REGS);
     printf("Configuration finished.\n");
 
-    return 0;
-}
-
-int synth_close() {
-    i2cClose();
-    return 0;
-}
-
-/* Write data to one register */
-static int synth_write_register(synth_register_t si_register) {
-    //uint8_t page = get_page(si_register.address);
-    //uint8_t reg = get_reg(si_register.address);
-    synth_regaddr_t regaddr = get_reg_addr(si_register);
-    uint8_t val = si_register.value;
-    uint8_t buffer[2] = {0};
-
-    // On si3540, before we can access a register, we must set the page
-    buffer[0] = PAGE;
-    //buffer[1] = page;
-    buffer[1] = regaddr.page;
-    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 2)){
-        perror("Failed to set page\n");
-        return 1;
-    }
-
-    // A. Write register value
-    //buffer[0] = reg;
-    buffer[0] = regaddr.reg;
-    buffer[1] = val;
-    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 2)){
-        perror("Failed to set register\n");
-        return 1;
-    }
-    return 0;
-}
-
-/* Write array of register data */
-static int synth_write_registers(synth_register_t const synth_regs[], int const n_regs) {
-    for (int i = 0; i < n_regs; ++i) {
-        /*printf("0x%04x, 0x%02x\n",
-                synth_registers[i].address,
-                synth_registers[i].value);*/
-        if (synth_write_register(synth_regs[i]) != 0){
-            perror("Programming failed");
-            synth_close();
-            return 1;
-        }
-        if (i == END_PREAMBLE_REG) {
-            usleep(PREAMBLE_SLEEP);  // See documentation Si5340D
-        }
-    }
     return 0;
 }
 
@@ -130,9 +85,9 @@ int synth_set_freq(synth_channel_t channel, synth_freq_t freq){
     int err = 0;
     if(channel == OUT2){
         if(freq == F22M579){
-            synth_write_registers(synth_registers_delta_441, DELTA_441_CONFIG_NUM_REGS);
+            write_registers(synth_registers_delta_441, DELTA_441_CONFIG_NUM_REGS);
         }else if(freq == F24M576){
-            synth_write_registers(synth_registers_delta_48, DELTA_48_CONFIG_NUM_REGS);
+            write_registers(synth_registers_delta_48, DELTA_48_CONFIG_NUM_REGS);
         }else{
             perror("Unknown frequency\n");
             err = 1;
@@ -142,4 +97,50 @@ int synth_set_freq(synth_channel_t channel, synth_freq_t freq){
         err = 1;
     }
     return err;
+}
+
+/* Write data to one register */
+static int write_register(synth_register_t si_register) {
+    //uint8_t page = get_page(si_register.address);
+    //uint8_t reg = get_reg(si_register.address);
+    synth_regaddr_t regaddr = get_reg_addr(si_register);
+    uint8_t val = si_register.value;
+    uint8_t buffer[2] = {0};
+
+    // On si3540, before we can access a register, we must set the page
+    buffer[0] = PAGE;
+    //buffer[1] = page;
+    buffer[1] = regaddr.page;
+    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 2)){
+        perror("Failed to set page\n");
+        return 1;
+    }
+
+    // A. Write register value
+    //buffer[0] = reg;
+    buffer[0] = regaddr.reg;
+    buffer[1] = val;
+    if(write_i2c_block_data_raw(SYNTH_ADDR, buffer, 2)){
+        perror("Failed to set register\n");
+        return 1;
+    }
+    return 0;
+}
+
+/* Write array of register data */
+static int write_registers(const synth_register_t *synth_regs, int const n_regs) {
+    for (int i = 0; i < n_regs; ++i) {
+        /*printf("0x%04x, 0x%02x\n",
+                synth_registers[i].address,
+                synth_registers[i].value);*/
+        if (write_register(synth_regs[i]) != 0){
+            perror("Programming failed");
+            synth_close();
+            return 1;
+        }
+        if (i == END_PREAMBLE_REG) {
+            usleep(PREAMBLE_SLEEP);  // See documentation Si5340D
+        }
+    }
+    return 0;
 }

@@ -42,7 +42,7 @@ int i2cClose(){
     return 0;
 }
 
-int write_i2c_block_data_raw(unsigned char addr, unsigned char *outbuf, unsigned short outbuf_size) {
+int write_i2c_block_data_raw(uint8_t addr, uint8_t *outbuf, uint16_t outbuf_size) {
 
     struct i2c_rdwr_ioctl_data packets;
     struct i2c_msg messages[1];
